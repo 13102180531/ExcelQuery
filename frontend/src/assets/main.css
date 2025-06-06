@@ -1,0 +1,164 @@
+/* main.css */
+
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/*
+  Global body and #app styles for a full-screen application.
+  The App.vue styles will also define similar things for html, body,
+  but having robust defaults here is good.
+*/
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    color: #333;
+    background-color: #f0f2f5; /* Default background for the entire app */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#app { /* This is where your Vue application mounts */
+    width: 100%;
+    height: 100%;
+    display: flex; /* Allows its direct child (App.vue's root) to fill it */
+    flex-direction: column;
+}
+
+/*
+  Styles for the Login/Registration Form Card.
+  These will be applied by the LoginForm.vue and RegistrationForm.vue components.
+*/
+.form-card {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%; /* Take full width of its container (.auth-wrapper) */
+    max-width: 450px; /* But don't get wider than this */
+}
+
+.form-card h2 {
+    color: #1d2129;
+    font-size: 24px; /* 1.5rem if base is 16px */
+    margin-bottom: 10px;
+}
+
+.app-name { /* Optional: if you want to display an app name inside the form card */
+    font-size: 18px; /* 1.125rem */
+    color: #555;
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #4b4f56;
+    font-size: 14.4px; /* 0.9rem */
+}
+
+.input-group input,
+.input-group select { /* Added select for consistency */
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    font-size: 16px; /* 1rem */
+    color: #1d2129; /* Ensure input text is dark enough */
+}
+
+.input-group input::placeholder { /* Style placeholder text if needed */
+    color: #8a8d91;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: #1877f2; /* A blue focus color, e.g., Facebook blue */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+.btn-submit {
+    background-color: #007bff; /* Bootstrap primary blue */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px; /* 1rem */
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-submit:hover:not(:disabled) { /* Ensure hover only works when not disabled */
+    background-color: #0056b3; /* Darker blue */
+}
+
+.btn-submit:disabled {
+    background-color: #aecbfa; /* Lighter, disabled blue */
+    color: #6c757d; /* Muted text color for disabled state */
+    cursor: not-allowed;
+}
+
+.message {
+    margin-top: 15px;
+    padding: 10px 15px; /* Slightly more padding */
+    border-radius: 6px; /* Match input border-radius */
+    font-size: 14.4px; /* 0.9rem */
+    text-align: left; /* Keep text aligned left */
+    line-height: 1.5; /* Improve readability */
+}
+
+.message.success {
+    background-color: #d1e7dd; /* Bootstrap success background */
+    color: #0f5132;      /* Bootstrap success text */
+    border: 1px solid #badbcc; /* Bootstrap success border */
+}
+
+.message.error {
+    background-color: #f8d7da; /* Bootstrap danger background */
+    color: #842029;      /* Bootstrap danger text */
+    border: 1px solid #f5c2c7; /* Bootstrap danger border */
+}
+
+/* For displaying validation errors or small helper texts below inputs */
+.error-detail, .helper-text {
+    font-size: 12.8px; /* 0.8rem */
+    margin-top: 4px;
+    text-align: left;
+}
+.error-detail {
+    color: #dc3545; /* Bootstrap danger red */
+}
+.helper-text {
+    color: #6c757d; /* Bootstrap secondary text color */
+}
+
+/* Optional: Link style for "Switch to Register/Login" */
+.form-switch-link {
+    display: block;
+    margin-top: 20px;
+    font-size: 14.4px; /* 0.9rem */
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+}
+.form-switch-link:hover {
+    text-decoration: underline;
+}
