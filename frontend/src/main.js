@@ -1,5 +1,9 @@
+// frontend/src/main.js
 import { createApp } from 'vue'
 import App from './App.vue'
-import './assets/main.css' // Import global styles
+import router from './router' // Import the router
+import './assets/main.css' // Assuming you have global styles
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(router) // Use the router
+app.mount('#app')

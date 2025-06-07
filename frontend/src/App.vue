@@ -1,116 +1,105 @@
 <template>
-  <div id="app-shell"> <!-- This is the root element of your App.vue component -->
+  <div id="app-shell">
     <div v-if="!isAuthenticated" class="auth-wrapper">
-      <!-- LoginForm and RegistrationForm will use classes like .form-card from main.css -->
       <LoginForm v-if="showLogin" @login-success="handleAuthSuccess" @switch-to-register="showLogin = false" />
       <RegistrationForm v-else @registration-success="handleRegistrationSuccess" @switch-to-login="showLogin = true" />
     </div>
-    <ExcelQueryTool v-else :current-username="username" @user-logout="handleLogout" />
+    <router-view v-else :key="$route.fullPath" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { jwtDecode } from 'jwt-decode'; // Ensure: npm install jwt-decode
+import { ref, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
 
-// Import your components
-import LoginForm from './components/LoginForm.vue'; // Ensure path is correct
-import RegistrationForm from './components/RegistrationForm.vue'; // Ensure path is correct
-import ExcelQueryTool from './components/ExcelQueryTool.vue'; // Ensure path is correct
+// --- ADD THESE IMPORTS ---
+import LoginForm from './components/LoginForm.vue';
+import RegistrationForm from './components/RegistrationForm.vue';
+// --- END OF ADDED IMPORTS ---
+
+const router = useRouter();
+const route = useRoute();
 
 const showLogin = ref(true);
 const isAuthenticated = ref(false);
-const username = ref('');
 
-const checkAuth = () => {
+const checkAuthAndRedirect = () => {
   const token = localStorage.getItem('authToken');
+  let validToken = false;
   if (token) {
     try {
       const decodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-
-      if (decodedToken.exp < currentTime) {
-        console.warn("Token expired. Logging out.");
-        handleLogout();
-        return;
+      if (decodedToken.exp > currentTime) {
+        validToken = true;
+      } else {
+        console.warn("App.vue: Token expired during App.vue checkAuth");
       }
-      username.value = decodedToken.sub || decodedToken.username || 'User';
-      isAuthenticated.value = true;
-      console.log("User authenticated:", username.value);
     } catch (error) {
-      console.error("Invalid token or token decoding error:", error);
-      handleLogout();
+      console.error("App.vue: Invalid token during App.vue checkAuth:", error);
     }
-  } else {
-    isAuthenticated.value = false;
-    username.value = '';
-    console.log("No auth token found.");
+  }
+
+  isAuthenticated.value = validToken;
+
+  if (!validToken && route.meta.requiresAuth) {
+    // If not authenticated and trying to access a protected route,
+    // App.vue will show login forms due to `isAuthenticated` being false.
+    // The router guard might also redirect to a dedicated login page if you had one.
+    // For now, the v-if/v-else in the template handles showing login forms.
+    console.log("App.vue: Not authenticated, login forms will be shown.");
+  } else if (validToken && !route.meta.requiresAuth && route.path === '/login') { // Example if you had a /login route
+    // If authenticated and somehow on a login page, redirect to home
+    // router.push({ name: 'ExcelTool' }); // Or router's default authenticated route
   }
 };
 
+
 onMounted(() => {
-  checkAuth();
+  checkAuthAndRedirect();
   window.addEventListener('storage', (event) => {
     if (event.key === 'authToken' || (event.key === null && !localStorage.getItem('authToken'))) {
-      console.log("AuthToken changed in another tab, re-checking auth.");
-      checkAuth();
+      checkAuthAndRedirect();
     }
   });
 });
 
+watch(route, () => {
+  // Re-check auth on route change, especially if navigating back/forward
+  // or if router guards are not fully handling all cases.
+  checkAuthAndRedirect();
+});
+
 const handleAuthSuccess = () => {
-  console.log("Login successful.");
-  checkAuth();
+  checkAuthAndRedirect();
+  router.push({ name: 'ExcelTool' }); // Ensure this matches a route name in your router config
 };
 
 const handleRegistrationSuccess = () => {
-  console.log("Registration successful. Please log in.");
   showLogin.value = true;
 };
 
-const handleLogout = () => {
-  console.log("Logging out user.");
+const handleLogout = () => { // This is called by AuthenticatedLayout via router-view's emit
   localStorage.removeItem('authToken');
-  isAuthenticated.value = false;
-  username.value = '';
-  showLogin.value = true;
+  localStorage.removeItem('tokenType');
+  checkAuthAndRedirect(); // This will set isAuthenticated to false
+  // No explicit redirect to login needed if App.vue shows forms when !isAuthenticated
 };
 </script>
 
 <style>
-/*
-  These are global styles specific to App.vue's structure.
-  The main.css file provides more general resets and utility styles.
-  The styles for html, body from main.css should be sufficient.
-  If there's any conflict, ensure the desired styles are applied.
-*/
-
-#app-shell { /* This is the root element within #app for App.vue */
+/* ... your existing App.vue styles ... */
+html, body { height: 100%; width: 100%; margin: 0; padding: 0; font-family: sans-serif; }
+#app-shell {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* background-color will be inherited from body/html (set in main.css) */
 }
-
-/* Styles for the authentication view wrapper */
 .auth-wrapper {
-  display: flex;
-  flex-direction: column; /* To stack elements like a title above the form card */
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1; /* Takes up all available space when auth forms are shown */
-  width: 100%;
-  padding: 20px; /* Padding around the centered content */
-  box-sizing: border-box;
-  /* background-color: #f0f2f5; -- Inherited from body, or set if different for this view */
+  display: flex; justify-content: center; align-items: center;
+  flex-grow: 1; width: 100%; padding: 20px; box-sizing: border-box;
+  background-color: #f0f2f5;
 }
-
-/*
-  When ExcelQueryTool is rendered (v-else branch):
-  - It will be a direct child of #app-shell.
-  - #app-shell is 100% width and 100% height (filling #app).
-  - ExcelQueryTool's root element (.excel-query-tool-page) is styled in its own
-    component for 100% width and height to fill #app-shell.
-*/
 </style>
